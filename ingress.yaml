@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: car-rent-ingress
+spec:
+  rules:
+  - host: tn.bd.catalog
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: catalog-service
+          servicePort: 8080
+  - host: tn.bd.booking
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: booking-service
+          servicePort: 8080
+          

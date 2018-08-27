@@ -1,0 +1,60 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: booking-service
+  labels:
+    app: rent-car
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      nodePort: 31002
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: rent-car
+    tier: booking
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: booking-service
+  labels:
+    app: rent-car
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: rent-car
+        tier: booking
+    spec:
+      containers:
+        - image: ziedyazidi/booking-service
+          imagePullPolicy: Always
+          name: booking-service
+          env:
+            - name: MYSQL_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: rent-car-credentials
+                  key: username
+            - name: MYSQL_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rent-car-credentials
+                  key: password
+            - name: MYSQL_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: rent-car-credentials
+                  key: host
+            - name: MYSQL_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: rent-car-credentials
+                  key: port
+          ports:
+            - containerPort: 8080

@@ -1,0 +1,47 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rent-car-database
+  labels:
+    app: rent-car
+spec:
+  ports:
+    - port: 3306
+      protocol: TCP
+      targetPort: 3306
+  selector:
+    app: rent-car
+    tier: database
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: rent-car-database
+  labels:
+    app: rent-car
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: rent-car
+        tier: database
+    spec:
+      containers:
+        - image: mysql:5.6
+          name: rent-car-database
+          env:
+            - name: MYSQL_USER
+              value: zied
+            - name: MYSQL_PASSWORD
+              value: zied
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+            - name: MYSQL_DATABASE
+              value: rentcardb
+
+          ports:
+            - containerPort: 3306
+              name: db
