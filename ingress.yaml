@@ -1,6 +1,31 @@
+
+
+# apiVersion: configuration.konghq.com/v1
+# kind: KongIngress
+# metadata:
+#   name: car-rent-ingress
+# upstream:
+#   hash_on: ip
+#   hash_fallback: none
+# proxy:
+#   connect_timeout: 10000
+#   retries: 10
+#   read_timeout: 10000
+#   write_timeout: 10000
+# route:
+#   methods:
+#   - POST
+#   - GET
+#   regex_priority: 5
+#   strip_path: true
+#   preserve_host: true
+
+# ---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
+  annotations:
+    ingress.kubernetes.io/enable-cors: "true"
   name: car-rent-ingress
 spec:
   rules:
@@ -19,3 +44,18 @@ spec:
           serviceName: booking-service
           servicePort: 8080
           
+# ---
+
+# apiVersion: extensions/v1beta1
+# kind: Ingress
+# metadata:
+#   name: car-rent-ingress
+# spec:
+#   rules:
+#   - host: tn.bd.catalog
+#     http:
+#       paths:
+#       - path: /
+#         backend:
+#           serviceName: catalog-service
+#           servicePort: 8080
