@@ -118,36 +118,17 @@ Once you have successfully pushed your images, you will need to modify the yaml 
 * Deploy Spring Boot Microservices
 
 ```bash
-$ kubectl apply -f compute-interest-api.yaml
-service "compute-interest-api" created
-deployment "compute-interest-api" created
+$ kubectl create -f catalog-service.yaml
+service "catalog-service" created
+deployment "catalog-service" created
 ```
 
 ```bash
-$ kubectl apply -f send-notification.yaml
-service "send-notification" created
-deployment "send-notification" created
+$ kubectl create -f booking-service.yaml
+service "booking-service" created
+deployment "booking-service" created
 ```
 
-* Deploy the Frontend service
-
-The UI is a Node.js app serving static files (HTML, CSS, JavaScript) that shows the total account balance.
-
-```bash
-$ kubectl apply -f account-summary.yaml
-service "account-summary" created
-deployment "account-summary" created
-```
-
-* Deploy the Transaction Generator service
-The transaction generator is a Python app that generates random transactions with accumulated interest.
-
-Create the transaction generator **Python** app:
-```bash
-$ kubectl apply -f transaction-generator.yaml
-service "transaction-generator" created
-deployment "transaction-generator" created
-```
 
 <!-- ### 5. Access Your Application
 You can access your app publicly through your Cluster IP and the NodePort. The NodePort should be **30080**.
