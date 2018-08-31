@@ -11,16 +11,17 @@ The backend uses a MySQL database to store the cars and the contracts.
 
 * Create a Kubernetes cluster with [Minikube](https://kubernetes.io/docs/getting-started-guides/minikube) for local testing.
 
-* Install the command-line tool [Kubectl](https://console.bluemix.net/openwhisk/learn/cli/)to manage and deploy applications on kubernetes.
+* Install the command-line tool [Kubectl](https://console.bluemix.net/openwhisk/learn/cli/) to manage and deploy applications on kubernetes.
 
 #Flow
 
 # Steps
 1. [Clone the repo](#1-clone-the-repo)
-2. [Create the Database service](#2-create-the-database-service)
-3. [Create the Spring Boot Microservices](#3-create-the-spring-boot-microservices)
-4. [Deploy the Microservices](#5-deploy-the-microservices)
-5. [Access Your Application](#6-access-your-application)
+2. [Set up the Kong Ingress Controller](#2-Set-up-the-Kong-Ingress-Controller)
+3. [Create the Database service](#3-create-the-database-service)
+4. [Create the Spring Boot Microservices](#4-create-the-spring-boot-microservices)
+5. [Deploy the Microservices](#5-deploy-the-microservices)
+6. [Access the microservices via Kong](#6-Access-the-microservices-via-Kong)
 
 ### 1. Clone the repo
 
@@ -30,8 +31,12 @@ Clone this repository. In a terminal, run:
 $ git clone https://github.com/ziedYazidi/microservices-rent-car-example.git
 ```
 
-### 2. Create the Database service
+### 2. Set up the Kong Ingress Controller
+In this step, we want to integrate Kong with the Kubernetes Ingress Controller spec, this way kong ties directly to the Kubernetes lifecycle. As applications are deployed and new services are created, Kong will automatically live configure itself to serve traffic to these services.
 
+Check this [Kong repository](https://github.com/Kong/kubernetes-ingress-controller/blob/master/deploy/minikube.md) to set up Kong Ingress Controller
+
+### 3. Create the Database service
 The backend consists of a MySQL database and the Spring Boot app. Each
 microservice has a Deployment and a Service. The deployment manages
 the pods started for each microservice. The Service creates a stable
@@ -52,7 +57,13 @@ $ kubectl apply -f secrets.yaml
 secret "rent-car-credentials" created
 ```
 
-### 3. Create the Spring Boot Microservices
+You can access the database pod as follows:
+```
+$ kubectl exec -it rent-car-database-XXX bash
+root@rent-car-database-XXX:/# 
+```
+
+### 4. Create the Spring Boot Microservices
 You will need to have [Maven installed in your environment](https://maven.apache.org/index.html).
 If you want to modify the Spring Boot apps, you will need to do it before building the Java project and the docker image.
 
@@ -113,7 +124,7 @@ Once you have successfully pushed your images, you will need to modify the yaml 
 
 
 
-### 4. Deploy the Microservices
+### 5. Deploy the Microservices
 
 * Deploy Spring Boot Microservices
 
@@ -130,26 +141,72 @@ deployment "booking-service" created
 ```
 
 
-<!-- ### 5. Access Your Application
-You can access your app publicly through your Cluster IP and the NodePort. The NodePort should be **30080**.
+* Get Microservices URL
+```
+$ minikube service catalog-service --url
+http://192.168.99.100:31001
+```
+* Consume catalog-service web service:
+```
+http http://192.168.99.100:31001/car/findAll
+HTTP/1.1 200 
+Content-Type: application/json;charset=UTF-8
+Date: Fri, 31 Aug 2018 09:30:41 GMT
+Transfer-Encoding: chunked
 
-* To find your IP:
-```bash
-$ ibmcloud cs workers <cluster-name>
-ID                                                 Public IP        Private IP      Machine Type   State    Status   
-kube-dal10-paac005a5fa6c44786b5dfb3ed8728548f-w1   169.47.241.213   10.177.155.13   free           normal   Ready  
+[
+    {
+        "carId": 1, 
+        "carImage": "../assets/img/classG.png", 
+        "carImmatriculation": "192 TU 5167", 
+        "carName": "Mercedes Class G", 
+        "carNbrDoors": 5, 
+        "carNbrSeats": 4, 
+        "carPrice": 100, 
+        "containsAC": true, 
+        "manual": false
+    }
+]
 ```
 
-* To find the NodePort of the account-summary service:
-```bash
-$ kubectl get svc
-NAME                    CLUSTER-IP     EXTERNAL-IP   PORT(S)                                                                      AGE
-...
-account-summary         10.10.10.74    <nodes>       80:30080/TCP                                                                 2d
-...
+### 6. Access the microservices via Kong: 
+Now that our microservices are deployed, we still need an Ingress Resource to serve traffic to it. To create one for our catalog-service and booking-service use the manifest ingress.yml:
 ```
-* On your browser, go to `http://<your-cluster-IP>:30080`
-![Account-balance](images/balance.png) -->
+$ kubectl create -f ingress.yaml 
+```
+
+Now, we can access the microservices via Kong:
+> Note: Check the kong repository (Link in step 2) to create the environment variables
+```
+$ http ${PROXY_IP}:${HTTP_PORT}/car/findAll Host:tn.bd.catalog
+HTTP/1.1 200 
+Connection: keep-alive
+Content-Type: application/json;charset=UTF-8
+Date: Fri, 31 Aug 2018 09:48:24 GMT
+Transfer-Encoding: chunked
+Via: kong/0.13.1
+X-Kong-Proxy-Latency: 290
+X-Kong-Upstream-Latency: 68
+
+[
+    {
+        "carId": 1, 
+        "carImage": "../assets/img/classG.png", 
+        "carImmatriculation": "192 TU 5167", 
+        "carName": "Mercedes Class G", 
+        "carNbrDoors": 5, 
+        "carNbrSeats": 4, 
+        "carPrice": 100, 
+        "containsAC": true, 
+        "manual": false
+    }
+]
+```
+We can see that two request headers which are **X-Kong-Proxy-Latency** and **X-Kong-Upstream-Latency** were added.
+
+Now feel free to configure a Kong plugin using annotations in Kubernetes Services. You can find the plugins [HERE](https://konghq.com/plugins/)
+
+
 
 
 ## References
