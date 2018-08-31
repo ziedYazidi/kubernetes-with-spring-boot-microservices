@@ -1,7 +1,7 @@
 # Description
 This project is an implementation of a microservices architecture. It demonstarates how spring boot applications can be deployed on top of kubernetes.
 The application uses a two Java 8/Spring Boot microservices, the first returns a list of cars that a user can rent and the second contains the contracts submitted by the user.
-The [frontend](https://github.com/ziedYazidi/Dynamic-Form-Generator) uses an Angular app that lists the cars and submits a contract once a car is chosen. 
+The [frontend](https://github.com/ziedYazidi/Dynamic-Form-Generator) is an Angular app that lists the cars and submits a contract once a car is chosen. 
 The backend uses a MySQL database to store the cars and the contracts.
 
 
