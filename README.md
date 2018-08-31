@@ -5,6 +5,13 @@ The [frontend](https://github.com/ziedYazidi/Dynamic-Form-Generator) is an Angul
 The backend uses a MySQL database to store the cars and the contracts.
 
 
+# Architecture
+
+![spring-boot-kube](Architecture.jpg)
+
+Concerning the database, It is recommended to keep each microservice’s persistent data private to that service and accessible only via its API. I used a Private-tables-per-service approach which states that each service must own a set of tables that must only be accessed by that service.
+You can read more about this in y [Chris Richardson Website](https://microservices.io/patterns/data/database-per-service.html) 
+
 # Prerequisite
 
 * Install [Minikube](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl)
@@ -12,13 +19,6 @@ The backend uses a MySQL database to store the cars and the contracts.
 * Create a Kubernetes cluster with [Minikube](https://kubernetes.io/docs/getting-started-guides/minikube) for local testing.
 
 * Install the command-line tool [Kubectl](https://console.bluemix.net/openwhisk/learn/cli/) to manage and deploy applications on kubernetes.
-
-# Architecture
-
-![spring-boot-kube](architecture.jpg)
-
-Concerning the database, It is recommended to keep each microservice’s persistent data private to that service and accessible only via its API. I used a Private-tables-per-service approach which states that each service must own a set of tables that must only be accessed by that service.
-You can read more about this in y [Chris Richardson Website](https://microservices.io/patterns/data/database-per-service.html) 
 
 # Steps
 1. [Clone the repo](#1-clone-the-repo)
